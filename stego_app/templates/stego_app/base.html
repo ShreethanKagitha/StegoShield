@@ -11,7 +11,7 @@
 
     <!-- Google Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap"
         rel="stylesheet">
 
     <!-- Bootstrap Icons -->
@@ -23,18 +23,21 @@
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #1a1a2e;
-            --secondary: #16213e;
-            --accent: #0f3460;
-            --highlight: #e94560;
-            --success: #00d4aa;
+            --primary: #0a0f16;
+            --secondary: #121826;
+            --accent: #1f2940;
+            --highlight: #00f0ff;
+            --success: #39ff14;
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glow: 0 0 20px rgba(233, 69, 96, 0.3);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(0, 240, 255, 0.15);
+            --glow: 0 0 20px rgba(0, 240, 255, 0.3);
         }
 
         * {
@@ -62,23 +65,37 @@
             pointer-events: none;
         }
 
-        /* Navbar */
+        /* Professional Navbar */
         .navbar {
-            background: var(--glass-bg) !important;
+            background: transparent !important;
+            padding: 1.5rem 0;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            z-index: 1030;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 15, 22, 0.85) !important;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+            padding: 0.8rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .navbar-brand {
             font-family: 'Orbitron', sans-serif;
             font-weight: 800;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             background: linear-gradient(135deg, var(--highlight), var(--success));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: 1px;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
         }
 
         .navbar-brand i {
@@ -92,32 +109,21 @@
             font-family: 'Rajdhani', sans-serif;
             font-weight: 600;
             font-size: 1.1rem;
-            color: var(--text-secondary) !important;
+            color: var(--text-primary) !important;
+            opacity: 0.7;
             transition: all 0.3s ease;
             position: relative;
-            padding: 0.5rem 1.5rem !important;
+            padding: 0.5rem 1.2rem !important;
+            margin: 0 0.3rem;
+            border-radius: 30px;
         }
 
         .nav-link:hover,
         .nav-link.active {
-            color: var(--highlight) !important;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--highlight), var(--success));
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after,
-        .nav-link.active::after {
-            width: 80%;
+            opacity: 1;
+            color: var(--primary) !important;
+            background: var(--highlight);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
         }
 
         /* Glass Card */
@@ -133,8 +139,9 @@
 
         .glass-card:hover {
             border-color: var(--highlight);
-            box-shadow: var(--glow);
-            transform: translateY(-5px);
+            box-shadow: var(--glow), 0 15px 30px rgba(0, 0, 0, 0.4);
+            transform: translateY(-10px) scale(1.02);
+            z-index: 10;
         }
 
         /* Buttons */
@@ -276,6 +283,20 @@
             background-clip: text;
         }
 
+        .hero-title {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: 3.8rem;
+            letter-spacing: 4px;
+            color: #ffffff;
+            text-shadow: 
+                0 0 10px rgba(0, 240, 255, 0.8),
+                0 0 20px rgba(0, 240, 255, 0.5),
+                0 0 40px rgba(0, 240, 255, 0.3);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
         /* Alert Styling */
         .alert {
             background: var(--glass-bg);
@@ -303,12 +324,73 @@
 
         /* Footer */
         footer {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--glass-border);
-            padding: 2rem;
-            text-align: center;
+            background: rgba(10, 15, 22, 0.8);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 4rem 0 2rem;
             color: var(--text-secondary);
+            margin-top: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-brand {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: inline-block;
+            letter-spacing: 2px;
+        }
+
+        .footer-brand i {
+            color: var(--highlight);
+            text-shadow: 0 0 10px var(--highlight);
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-link:hover {
+            color: var(--highlight);
+            transform: translateX(5px);
+        }
+
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-right: 0.8rem;
+            border: 1px solid transparent;
+        }
+
+        .social-icon:hover {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--highlight);
+            border-color: var(--highlight);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .footer-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+            margin: 2.5rem 0 1.5rem;
         }
 
         /* Capacity Chart Container */
@@ -411,11 +493,48 @@
             border-color: var(--highlight);
             border-right-color: transparent;
         }
+        /* Custom Cursor */
+        body, a, button, input, textarea, label, .upload-area, .glass-card {
+            cursor: none !important;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9998;
+            mix-blend-mode: difference;
+            transition: width 0.2s, height 0.2s, background-color 0.2s, border 0.2s;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
+    <!-- Custom Cursor Elements -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
     <!-- Three.js Background Canvas -->
     <canvas id="three-canvas"></canvas>
 
@@ -455,6 +574,19 @@
                             <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link" href="{% url 'stego_app:logout' %}" style="color: var(--highlight) !important; border: 1px solid var(--highlight); border-radius: 30px; padding: 0.5rem 1.5rem !important;">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout ({{ user.username }})
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" href="{% url 'stego_app:login' %}" style="color: var(--success) !important; border: 1px solid var(--success); border-radius: 30px; padding: 0.5rem 1.5rem !important;">
+                            <i class="bi bi-person-circle me-1"></i>Login
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -468,11 +600,65 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p class="mb-0">
-                <i class="bi bi-shield-check me-2"></i>
-                <strong>SecureHide</strong> - Advanced Image Steganography | LSB Technique
-            </p>
-            <small class="text-muted">Your messages are hidden in plain sight</small>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="footer-brand">
+                        <i class="bi bi-shield-lock-fill me-2"></i>SECUREHIDE
+                    </div>
+                    <p class="small text-secondary mb-4">
+                        An advanced image steganography tool powered by LSB technology. 
+                        Hide your sensitive data securely and imperceptibly within ordinary PNG and BMP images.
+                    </p>
+                    <div class="d-flex">
+                        <a href="#" class="social-icon"><i class="bi bi-github"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-discord"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <h6 class="text-white mb-3" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;">Quick Links</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li><a href="{% url 'stego_app:home' %}" class="footer-link">Home</a></li>
+                        <li><a href="{% url 'stego_app:encode' %}" class="footer-link">Encode Data</a></li>
+                        <li><a href="{% url 'stego_app:decode' %}" class="footer-link">Decode Data</a></li>
+                        <li><a href="{% url 'stego_app:dashboard' %}" class="footer-link">Analytics Dashboard</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <h6 class="text-white mb-3" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;">Resources</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li><a href="{% url 'stego_app:how_it_works' %}" class="footer-link">How it Works</a></li>
+                        <li><a href="{% url 'stego_app:api_docs' %}" class="footer-link">API Documentation</a></li>
+                        <li><a href="{% url 'stego_app:privacy' %}" class="footer-link">Privacy Policy</a></li>
+                        <li><a href="{% url 'stego_app:terms' %}" class="footer-link">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <h6 class="text-white mb-3" style="font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;">System Status</h6>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="spinner-grow spinner-grow-sm text-success me-2" role="status" style="width: 10px; height: 10px;"></div>
+                        <span class="small text-secondary">All systems operational</span>
+                    </div>
+                    <div class="mt-3 p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                        <small class="d-block text-secondary mb-1">LSB Engine Version</small>
+                        <code class="text-success" style="font-family: 'Space Grotesk', monospace;">v2.4.1-stable</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-divider"></div>
+            
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <small class="text-secondary">&copy; 2026 SecureHide. All rights reserved.</small>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                    <small class="text-secondary">Built with <i class="bi bi-heart-fill text-danger"></i> for Privacy</small>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -503,11 +689,11 @@
                 posArray[i + 1] = (Math.random() - 0.5) * 100;
                 posArray[i + 2] = (Math.random() - 0.5) * 100;
 
-                // Random colors between highlight (red) and success (teal)
+                // Random colors between highlight (cyan) and success (neon green)
                 const mixFactor = Math.random();
-                colorsArray[i] = 0.91 * (1 - mixFactor) + 0 * mixFactor;       // R
-                colorsArray[i + 1] = 0.27 * (1 - mixFactor) + 0.83 * mixFactor; // G
-                colorsArray[i + 2] = 0.37 * (1 - mixFactor) + 0.67 * mixFactor; // B
+                colorsArray[i] = 0.0 * (1 - mixFactor) + 0.22 * mixFactor;       // R
+                colorsArray[i + 1] = 0.94 * (1 - mixFactor) + 1.0 * mixFactor;   // G
+                colorsArray[i + 2] = 1.0 * (1 - mixFactor) + 0.08 * mixFactor;   // B
             }
 
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
@@ -535,7 +721,7 @@
             for (let i = 0; i < 5; i++) {
                 const geometry = geometries[i % geometries.length];
                 const material = new THREE.MeshBasicMaterial({
-                    color: Math.random() > 0.5 ? 0xe94560 : 0x00d4aa,
+                    color: Math.random() > 0.5 ? 0x00f0ff : 0x39ff14,
                     wireframe: true,
                     transparent: true,
                     opacity: 0.3
@@ -601,6 +787,66 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
         })();
+    </script>
+
+    <!-- AOS JS & Custom Cursor Logic -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Navbar Scroll Effect
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Custom Cursor Logic
+        const cursorDot = document.getElementById("cursor-dot");
+        const cursorOutline = document.getElementById("cursor-outline");
+
+        window.addEventListener("mousemove", function (e) {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Add smooth delay for outline
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // Add interactive hover effects for the cursor
+        const hoverables = document.querySelectorAll('a, button, .upload-area, .glass-card, input, textarea');
+        hoverables.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorDot.style.width = '0px';
+                cursorDot.style.height = '0px';
+                cursorOutline.style.width = '60px';
+                cursorOutline.style.height = '60px';
+                cursorOutline.style.backgroundColor = 'white';
+                cursorOutline.style.border = 'none';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorDot.style.width = '8px';
+                cursorDot.style.height = '8px';
+                cursorOutline.style.width = '40px';
+                cursorOutline.style.height = '40px';
+                cursorOutline.style.backgroundColor = 'transparent';
+                cursorOutline.style.border = '2px solid rgba(255, 255, 255, 0.5)';
+            });
+        });
     </script>
 
     {% block extra_js %}{% endblock %}

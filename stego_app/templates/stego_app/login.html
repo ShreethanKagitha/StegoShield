@@ -1,0 +1,56 @@
+{% extends 'stego_app/base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7" data-aos="zoom-in">
+            <div class="text-center mb-4">
+                <h1 class="hero-title mb-2" style="font-size: 2.5rem;">ACCESS HUB</h1>
+                <p class="text-secondary">Identify yourself to the system.</p>
+            </div>
+            
+            <div class="glass-card p-4 p-md-5">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} mb-4" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" action="{% url 'stego_app:login' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4 position-relative">
+                        <label for="username" class="form-label text-secondary small text-uppercase" style="letter-spacing: 1px;">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-secondary text-highlight" style="border-right: none;">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control bg-transparent border-secondary text-white" id="username" name="username" required style="border-left: none; box-shadow: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5 position-relative">
+                        <label for="password" class="form-label text-secondary small text-uppercase" style="letter-spacing: 1px;">Passphrase</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-secondary text-highlight" style="border-right: none;">
+                                <i class="bi bi-key"></i>
+                            </span>
+                            <input type="password" class="form-control bg-transparent border-secondary text-white" id="password" name="password" required style="border-left: none; box-shadow: none;">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-glow w-100 py-3 mb-3" style="font-family: 'Orbitron', sans-serif; letter-spacing: 2px; border-radius: 10px;">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>INITIALIZE HANDSHAKE
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-secondary mb-0 small">No clearance code? <a href="{% url 'stego_app:register' %}" class="text-highlight text-decoration-none ms-1" style="border-bottom: 1px dashed var(--highlight);">Request Access</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

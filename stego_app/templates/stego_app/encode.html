@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <!-- Page Header -->
-            <div class="text-center mb-5">
+            <div class="text-center mb-5" data-aos="fade-down">
                 <h1 class="section-title">
                     <i class="bi bi-lock-fill me-3"></i>Encode Message
                 </h1>
@@ -17,7 +17,7 @@
             <!-- Main Content -->
             <div class="row g-4">
                 <!-- Upload & Message Section -->
-                <div class="col-lg-7">
+                <div class="col-lg-7" data-aos="fade-right" data-aos-delay="100">
                     <div class="glass-card h-100">
                         <form method="post" enctype="multipart/form-data" id="encode-form">
                             {% csrf_token %}
@@ -105,7 +105,7 @@
                 </div>
 
                 <!-- Capacity & Result Section -->
-                <div class="col-lg-5">
+                <div class="col-lg-5" data-aos="fade-left" data-aos-delay="200">
                     <!-- Capacity Chart -->
                     <div class="glass-card mb-4">
                         <h5 class="mb-3" style="font-family: 'Orbitron', sans-serif;">

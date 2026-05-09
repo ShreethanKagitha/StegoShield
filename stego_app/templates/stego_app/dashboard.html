@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <div class="row mb-5">
-        <div class="col-12 text-center">
+        <div class="col-12 text-center" data-aos="fade-down">
             <h1 class="section-title">
                 <i class="bi bi-speedometer2 me-3"></i>Performance Analytics
             </h1>
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="row g-4 mb-5">
+    <div class="row g-4 mb-5" data-aos="fade-up" data-aos-delay="100">
         <div class="col-md-4 col-lg-2">
             <div class="glass-card text-center h-100 p-3">
                 <div class="stat-value" style="color: var(--highlight);">{{ total_ops }}</div>
@@ -48,7 +48,7 @@
     </div>
 
     <!-- Recent Activity Table -->
-    <div class="glass-card p-4">
+    <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="200">
         <h5 class="mb-4" style="font-family: 'Orbitron', sans-serif;">
             <i class="bi bi-activity me-2"></i>Recent Activity
         </h5>

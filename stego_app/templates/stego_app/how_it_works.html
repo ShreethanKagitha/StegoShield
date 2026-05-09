@@ -1,0 +1,32 @@
+{% extends 'stego_app/base.html' %}
+{% block title %}How It Works{% endblock %}
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up">
+            <h1 class="hero-title mb-4">How It Works</h1>
+            <div class="glass-card p-5">
+                <h3 class="mb-4 text-white">The Magic of LSB Steganography</h3>
+                <p class="text-secondary">
+                    Steganography is the practice of concealing a file, message, image, or video within another file. 
+                    Our platform uses the <strong>Least Significant Bit (LSB)</strong> algorithm to hide your sensitive data inside standard image files without noticeably changing their appearance.
+                </p>
+                <hr class="border-secondary my-4">
+                <h4 class="text-white mt-4 mb-3">1. The Encoding Process</h4>
+                <p class="text-secondary">
+                    Every digital image is made up of pixels. Each pixel has three color channels: Red, Green, and Blue (RGB), and each channel is represented by 8 bits (1 byte). 
+                    The LSB algorithm takes the secret message, converts it into binary (0s and 1s), and replaces the <em>last bit</em> of each pixel's color channels with the bits of your secret message.
+                </p>
+                <p class="text-secondary">
+                    Because we only change the least significant bit, the color of the pixel changes by at most 1/256th of its value. This tiny shift is completely invisible to the human eye!
+                </p>
+                <hr class="border-secondary my-4">
+                <h4 class="text-white mt-4 mb-3">2. Encryption & Security</h4>
+                <p class="text-secondary">
+                    Before embedding the message, we optionally encrypt your text using military-grade <strong>AES-256 encryption</strong>. This means even if someone suspects there is a hidden message and manages to extract the bits, they will only see scrambled nonsense without your secure password.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

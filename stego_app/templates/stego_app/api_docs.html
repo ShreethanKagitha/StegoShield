@@ -1,0 +1,52 @@
+{% extends 'stego_app/base.html' %}
+{% block title %}API Documentation{% endblock %}
+{% block content %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up">
+            <h1 class="hero-title mb-4">API Docs</h1>
+            <div class="glass-card p-5">
+                <h3 class="mb-4 text-white">Integration & Endpoints</h3>
+                <p class="text-secondary mb-5">
+                    SecureHide provides a RESTful API for calculating image capacities programmatically.
+                </p>
+
+                <h5 class="text-white">Calculate Image Capacity</h5>
+                <p class="text-secondary">Returns the maximum character capacity of an image.</p>
+                
+                <div class="p-3 mb-4 rounded" style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);">
+                    <code class="text-success fw-bold">POST /api/capacity/</code>
+                </div>
+
+                <h6 class="text-white">Parameters:</h6>
+                <table class="table table-dark table-hover mb-4" style="background: transparent;">
+                    <thead>
+                        <tr>
+                            <th class="text-secondary border-secondary">Parameter</th>
+                            <th class="text-secondary border-secondary">Type</th>
+                            <th class="text-secondary border-secondary">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border-secondary"><code>image</code></td>
+                            <td class="border-secondary">File (multipart/form-data)</td>
+                            <td class="border-secondary">The PNG or BMP image file.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="text-white">Response:</h6>
+                <pre class="p-3 rounded text-light" style="background: #0a0f16; border: 1px solid var(--glass-border);"><code>{
+  "success": true,
+  "capacity": {
+    "total_pixels": 1048576,
+    "max_bytes": 393216,
+    "max_chars": 393216
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

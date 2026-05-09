@@ -2,10 +2,14 @@
 Views for the Steganography Application
 """
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 import json
 import base64
 from PIL import Image
@@ -93,6 +97,7 @@ def encode(request):
                     # Record Stats
                     processing_time = (time.time() - start_time) * 1000
                     StegoStats.objects.create(
+                        user=request.user if request.user.is_authenticated else None,
                         operation='ENCODE',
                         image_size_bytes=image_size,
                         message_length=len(message),
@@ -107,6 +112,7 @@ def encode(request):
                     # Record Failure
                     processing_time = (time.time() - start_time) * 1000
                     StegoStats.objects.create(
+                        user=request.user if request.user.is_authenticated else None,
                         operation='ENCODE',
                         image_size_bytes=image_size,
                         message_length=len(message),
@@ -151,6 +157,7 @@ def decode(request):
                 # Record Stats
                 processing_time = (time.time() - start_time) * 1000
                 StegoStats.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
                     operation='DECODE',
                     image_size_bytes=image_size,
                     message_length=len(message) if message else 0,
@@ -163,6 +170,7 @@ def decode(request):
                 # Record Failure
                 processing_time = (time.time() - start_time) * 1000
                 StegoStats.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
                     operation='DECODE',
                     image_size_bytes=image_size,
                     processing_time_ms=processing_time,
@@ -219,19 +227,22 @@ def download_stego_image(request):
     return HttpResponse('No image data provided', status=400)
 
 
+@login_required
 def dashboard(request):
     """
     Performance analysis dashboard view.
     """
-    # Aggregate stats
-    total_ops = StegoStats.objects.count()
-    encode_ops = StegoStats.objects.filter(operation='ENCODE').count()
-    decode_ops = StegoStats.objects.filter(operation='DECODE').count()
+    # Aggregate stats for the current user
+    user_stats = StegoStats.objects.filter(user=request.user)
     
-    avg_psnr = StegoStats.objects.filter(operation='ENCODE', psnr__isnull=False).aggregate(Avg('psnr'))['psnr__avg']
-    avg_time = StegoStats.objects.aggregate(Avg('processing_time_ms'))['processing_time_ms__avg']
+    total_ops = user_stats.count()
+    encode_ops = user_stats.filter(operation='ENCODE').count()
+    decode_ops = user_stats.filter(operation='DECODE').count()
     
-    recent_activity = StegoStats.objects.all()[:10]
+    avg_psnr = user_stats.filter(operation='ENCODE', psnr__isnull=False).aggregate(Avg('psnr'))['psnr__avg']
+    avg_time = user_stats.aggregate(Avg('processing_time_ms'))['processing_time_ms__avg']
+    
+    recent_activity = user_stats.all()[:10]
     
     context = {
         'total_ops': total_ops,
@@ -242,3 +253,67 @@ def dashboard(request):
         'recent_activity': recent_activity
     }
     return render(request, 'stego_app/dashboard.html', context)
+
+
+def how_it_works(request):
+    """How it works information page."""
+    return render(request, 'stego_app/how_it_works.html')
+
+
+def api_docs(request):
+    """API documentation page."""
+    return render(request, 'stego_app/api_docs.html')
+
+
+def privacy(request):
+    """Privacy policy page."""
+    return render(request, 'stego_app/privacy.html')
+
+
+def terms(request):
+    """Terms of service page."""
+    return render(request, 'stego_app/terms.html')
+
+
+def user_login(request):
+    """Handle user login."""
+    if request.user.is_authenticated:
+        return redirect('stego_app:home')
+        
+    if request.method == 'POST':
+        u = request.POST.get('username')
+        p = request.POST.get('password')
+        user = authenticate(request, username=u, password=p)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('stego_app:home')
+        else:
+            messages.error(request, 'Invalid clearance credentials.')
+            
+    return render(request, 'stego_app/login.html')
+
+def user_register(request):
+    """Handle user registration."""
+    if request.user.is_authenticated:
+        return redirect('stego_app:home')
+        
+    if request.method == 'POST':
+        u = request.POST.get('username')
+        p1 = request.POST.get('password')
+        p2 = request.POST.get('password_confirm')
+        
+        if User.objects.filter(username=u).exists():
+            messages.error(request, 'Identity already exists in the system.')
+        elif p1 != p2:
+            messages.error(request, 'Passphrases do not match.')
+        else:
+            user = User.objects.create_user(username=u, password=p1)
+            auth_login(request, user)
+            return redirect('stego_app:home')
+            
+    return render(request, 'stego_app/register.html')
+
+def user_logout(request):
+    """Handle user logout."""
+    auth_logout(request)
+    return redirect('stego_app:login')

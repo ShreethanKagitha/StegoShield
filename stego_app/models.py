@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class StegoStats(models.Model):
     OPERATION_CHOICES = [
@@ -6,6 +7,7 @@ class StegoStats(models.Model):
         ('DECODE', 'Decoding'),
     ]
     
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     operation = models.CharField(max_length=10, choices=OPERATION_CHOICES)
     image_size_bytes = models.IntegerField()

@@ -3,27 +3,103 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="container">
+<style>
+    /* Home Page Specific Styles */
+    .hero-badge {
+        background: rgba(0, 240, 255, 0.1);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        color: var(--highlight);
+        letter-spacing: 2px;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+    
+    .feature-card {
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        border-top: 3px solid transparent;
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    .feature-card.encode-card:hover {
+        border-top: 3px solid var(--highlight);
+        box-shadow: 0 15px 30px rgba(0, 240, 255, 0.15);
+    }
+    .feature-card.secure-card:hover {
+        border-top: 3px solid var(--success);
+        box-shadow: 0 15px 30px rgba(57, 255, 20, 0.15);
+    }
+    
+    .step-number {
+        font-family: 'Syncopate', sans-serif;
+        font-size: 4rem;
+        font-weight: 700;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+        line-height: 1;
+        margin-bottom: -20px;
+        position: relative;
+        z-index: 0;
+        transition: all 0.3s ease;
+    }
+    .step-card:hover .step-number {
+        -webkit-text-stroke: 1px var(--highlight);
+        color: rgba(0, 240, 255, 0.1);
+        transform: scale(1.1) translateX(10px);
+    }
+    .step-content {
+        position: relative;
+        z-index: 1;
+        background: linear-gradient(180deg, rgba(10,15,22,0.8) 0%, rgba(10,15,22,0.4) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 15px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .terminal-box {
+        background: #05080f;
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        font-family: 'Space Grotesk', monospace;
+        overflow: hidden;
+    }
+    .terminal-header {
+        background: #0a0f16;
+        padding: 8px 15px;
+        border-bottom: 1px solid var(--glass-border);
+        display: flex;
+        gap: 8px;
+    }
+    .terminal-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+</style>
+
+<div class="container position-relative z-1">
     <!-- Hero Section -->
-    <section class="text-center py-5">
+    <section class="text-center py-5 mt-4">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="floating mb-4">
-                    <i class="bi bi-shield-lock-fill"
-                        style="font-size: 5rem; background: linear-gradient(135deg, var(--highlight), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-                </div>
-                <h1 class="section-title display-3 mb-4">Secure Data Hiding</h1>
-                <p class="lead text-secondary mb-5" style="font-size: 1.3rem;">
-                    Hide your secret messages within images using advanced <strong style="color: var(--highlight);">LSB
-                        Steganography</strong>.
-                    Your data remains invisible to the naked eye, yet perfectly recoverable.
+            <div class="col-lg-9" data-aos="zoom-out" data-aos-duration="1200">
+                <span class="badge rounded-pill hero-badge mb-4 px-4 py-2" style="font-family: 'Orbitron', sans-serif;">
+                    <i class="bi bi-broadcast me-2"></i>SECUREHIDE ENGINE V2.4
+                </span>
+                
+                <h1 class="hero-title display-3 mb-4">Secure Data Hiding</h1>
+                
+                <p class="lead text-secondary mb-5 mx-auto" style="font-size: 1.3rem; max-width: 700px;" data-aos="fade-up" data-aos-delay="200">
+                    Embed highly sensitive intelligence inside ordinary image files using undetectable 
+                    <strong style="color: var(--highlight);">LSB Steganography</strong>. 
+                    Your data hides in plain sight.
                 </p>
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="{% url 'stego_app:encode' %}" class="btn btn-glow btn-lg">
-                        <i class="bi bi-lock-fill me-2"></i>Encode Message
+                
+                <div class="d-flex justify-content-center gap-4 flex-wrap" data-aos="fade-up" data-aos-delay="400">
+                    <a href="{% url 'stego_app:encode' %}" class="btn btn-glow btn-lg px-5 py-3" style="border-radius: 30px; font-weight: 600; letter-spacing: 1px;">
+                        <i class="bi bi-lock-fill me-2"></i>ENCODE
                     </a>
-                    <a href="{% url 'stego_app:decode' %}" class="btn btn-glow btn-success-glow btn-lg">
-                        <i class="bi bi-unlock-fill me-2"></i>Decode Message
+                    <a href="{% url 'stego_app:decode' %}" class="btn btn-glow btn-success-glow btn-lg px-5 py-3" style="border-radius: 30px; font-weight: 600; letter-spacing: 1px;">
+                        <i class="bi bi-unlock-fill me-2"></i>DECODE
                     </a>
                 </div>
             </div>
@@ -31,52 +107,49 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-5">
+    <section class="py-5 mt-5">
         <div class="row g-4">
             <!-- Encode Feature -->
-            <div class="col-lg-4">
-                <div class="glass-card h-100">
-                    <div class="text-center mb-4">
-                        <div class="d-inline-block p-3 rounded-circle" style="background: rgba(233, 69, 96, 0.2);">
-                            <i class="bi bi-image-fill" style="font-size: 2.5rem; color: var(--highlight);"></i>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="glass-card feature-card encode-card h-100 p-4">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 60px; height: 60px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.2);">
+                            <i class="bi bi-image-fill" style="font-size: 1.8rem; color: var(--highlight);"></i>
                         </div>
                     </div>
-                    <h3 class="h4 text-center mb-3" style="font-family: 'Orbitron', sans-serif;">Image Encoding</h3>
-                    <p class="text-secondary text-center">
-                        Upload any PNG or BMP image and embed your secret message using the LSB technique.
-                        The output image looks identical to the original.
+                    <h3 class="h4 mb-3" style="font-family: 'Orbitron', sans-serif;">Bit-Level Encoding</h3>
+                    <p class="text-secondary mb-0">
+                        Upload any PNG or BMP image. Our algorithm seamlessly manipulates the least significant bits to embed your payload without altering visual fidelity.
                     </p>
                 </div>
             </div>
 
             <!-- Security Feature -->
-            <div class="col-lg-4">
-                <div class="glass-card h-100">
-                    <div class="text-center mb-4">
-                        <div class="d-inline-block p-3 rounded-circle" style="background: rgba(0, 212, 170, 0.2);">
-                            <i class="bi bi-shield-check" style="font-size: 2.5rem; color: var(--success);"></i>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="glass-card feature-card secure-card h-100 p-4">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 60px; height: 60px; background: rgba(57, 255, 20, 0.1); border: 1px solid rgba(57, 255, 20, 0.2);">
+                            <i class="bi bi-shield-lock" style="font-size: 1.8rem; color: var(--success);"></i>
                         </div>
                     </div>
-                    <h3 class="h4 text-center mb-3" style="font-family: 'Orbitron', sans-serif;">Invisible & Secure</h3>
-                    <p class="text-secondary text-center">
-                        Messages are hidden at the bit level, making them undetectable by visual inspection.
-                        Only those with access can decode.
+                    <h3 class="h4 mb-3" style="font-family: 'Orbitron', sans-serif;">Zero-Knowledge</h3>
+                    <p class="text-secondary mb-0">
+                        Your data never touches our disks. Payloads are processed purely in-memory using military-grade AES encryption before steganographic injection.
                     </p>
                 </div>
             </div>
 
             <!-- Capacity Feature -->
-            <div class="col-lg-4">
-                <div class="glass-card h-100">
-                    <div class="text-center mb-4">
-                        <div class="d-inline-block p-3 rounded-circle" style="background: rgba(233, 69, 96, 0.2);">
-                            <i class="bi bi-bar-chart-fill" style="font-size: 2.5rem; color: var(--highlight);"></i>
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="glass-card feature-card encode-card h-100 p-4">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-3" style="width: 60px; height: 60px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.2);">
+                            <i class="bi bi-activity" style="font-size: 1.8rem; color: var(--highlight);"></i>
                         </div>
                     </div>
-                    <h3 class="h4 text-center mb-3" style="font-family: 'Orbitron', sans-serif;">Capacity Analysis</h3>
-                    <p class="text-secondary text-center">
-                        Real-time calculation of image capacity ensures your message fits perfectly.
-                        Visual charts show available space.
+                    <h3 class="h4 mb-3" style="font-family: 'Orbitron', sans-serif;">Live Analytics</h3>
+                    <p class="text-secondary mb-0">
+                        View real-time PSNR (Peak Signal-to-Noise Ratio) and MSE metrics to guarantee your stego-image can bypass deep-packet inspection and forensic analysis.
                     </p>
                 </div>
             </div>
@@ -84,64 +157,82 @@
     </section>
 
     <!-- How It Works Section -->
-    <section class="py-5">
-        <h2 class="section-title text-center mb-5">How It Works</h2>
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="glass-card text-center h-100">
-                    <div class="stat-value mb-2">01</div>
-                    <h5 style="font-family: 'Rajdhani', sans-serif;">Upload Image</h5>
-                    <p class="text-secondary small mb-0">Select a PNG or BMP image as your carrier</p>
+    <section class="py-5 mt-5">
+        <div class="text-center mb-5">
+            <h2 class="hero-title" style="font-size: 2.5rem;" data-aos="fade-up">THE PIPELINE</h2>
+            <div style="width: 50px; height: 3px; background: var(--highlight); margin: 0 auto; box-shadow: 0 0 10px var(--highlight);"></div>
+        </div>
+        
+        <div class="row g-4 position-relative">
+            <!-- Connecting Line for Desktop -->
+            <div class="d-none d-lg-block position-absolute" style="top: 50%; left: 10%; right: 10%; height: 1px; z-index: 0; border-top: 1px dashed rgba(0, 240, 255, 0.3);"></div>
+            
+            <div class="col-lg-3 col-md-6 step-card" data-aos="fade-right" data-aos-delay="100">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h5 class="text-white mb-2" style="font-family: 'Orbitron', sans-serif;">Select Carrier</h5>
+                    <p class="text-secondary small mb-0">Upload a high-resolution PNG/BMP image to act as the vessel.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="glass-card text-center h-100">
-                    <div class="stat-value mb-2">02</div>
-                    <h5 style="font-family: 'Rajdhani', sans-serif;">Enter Message</h5>
-                    <p class="text-secondary small mb-0">Type your secret message to hide</p>
+            
+            <div class="col-lg-3 col-md-6 step-card" data-aos="fade-right" data-aos-delay="200">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h5 class="text-white mb-2" style="font-family: 'Orbitron', sans-serif;">Inject Payload</h5>
+                    <p class="text-secondary small mb-0">Input your secret intelligence and optional AES password.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="glass-card text-center h-100">
-                    <div class="stat-value mb-2">03</div>
-                    <h5 style="font-family: 'Rajdhani', sans-serif;">Encode</h5>
-                    <p class="text-secondary small mb-0">LSB algorithm embeds your message</p>
+            
+            <div class="col-lg-3 col-md-6 step-card" data-aos="fade-right" data-aos-delay="300">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h5 class="text-white mb-2" style="font-family: 'Orbitron', sans-serif;">Process LSB</h5>
+                    <p class="text-secondary small mb-0">The engine modifies the least significant bits instantaneously.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="glass-card text-center h-100">
-                    <div class="stat-value mb-2">04</div>
-                    <h5 style="font-family: 'Rajdhani', sans-serif;">Download</h5>
-                    <p class="text-secondary small mb-0">Get your stego-image ready to share</p>
+            
+            <div class="col-lg-3 col-md-6 step-card" data-aos="fade-right" data-aos-delay="400">
+                <div class="step-number">04</div>
+                <div class="step-content">
+                    <h5 class="text-white mb-2" style="font-family: 'Orbitron', sans-serif;">Extract</h5>
+                    <p class="text-secondary small mb-0">Download the stego-image, totally indistinguishable from the original.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Technical Info -->
-    <section class="py-5">
-        <div class="glass-card">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h3 class="h4 mb-4" style="font-family: 'Orbitron', sans-serif; color: var(--highlight);">
-                        <i class="bi bi-cpu me-2"></i>LSB Technique
+    <section class="py-5 mt-5 mb-5" data-aos="fade-up" data-aos-duration="1000">
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="row g-0 align-items-center">
+                <div class="col-lg-6 p-5">
+                    <span class="badge bg-dark text-success border border-success mb-3">TECHNICAL DEEP DIVE</span>
+                    <h3 class="h2 mb-4" style="font-family: 'Orbitron', sans-serif; color: var(--text-primary);">
+                        Imperceptible <span style="color: var(--highlight);">Manipulation</span>
                     </h3>
-                    <p class="text-secondary">
-                        <strong>Least Significant Bit (LSB)</strong> steganography modifies the last bit of each color
-                        channel
-                        in an image pixel. Since changing a single bit causes a color variation of only 1 out of 256
-                        levels,
-                        the difference is imperceptible to human eyes.
+                    <p class="text-secondary mb-4">
+                        Least Significant Bit (LSB) steganography intercepts the binary representation of an image's RGB channels. 
+                        By altering only the 8th bit of each byte, the absolute color shift is strictly limited to <strong>±1/256</strong>.
                     </p>
-                    <ul class="text-secondary">
-                        <li>Each pixel stores 3 bits (R, G, B channels)</li>
-                        <li>1 Megapixel image ≈ 375KB message capacity</li>
-                        <li>PNG/BMP formats preserve bit-level data</li>
-                        <li>JPEG compression destroys hidden data</li>
-                    </ul>
+                    
+                    <div class="terminal-box mb-0">
+                        <div class="terminal-header">
+                            <div class="terminal-dot" style="background: #ff5f56;"></div>
+                            <div class="terminal-dot" style="background: #ffbd2e;"></div>
+                            <div class="terminal-dot" style="background: #27c93f;"></div>
+                        </div>
+                        <div class="p-3">
+                            <div class="text-secondary small">>>> ANALYZING PIXEL [124, 89]</div>
+                            <div class="text-light mt-2">Original: <span style="color: #6c757d;">1101001</span><span class="text-danger fw-bold">0</span></div>
+                            <div class="text-light">Payload : <span class="text-success fw-bold">1</span> (Secret Bit)</div>
+                            <div class="text-light mt-1">Modified: <span style="color: #6c757d;">1101001</span><span class="text-success fw-bold">1</span></div>
+                            <div class="text-secondary mt-2 small">>>> VISUAL DELTA: 0.0039% (UNDETECTABLE)</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="text-center p-4">
+                
+                <div class="col-lg-6 bg-black bg-opacity-25 h-100 p-5 d-flex align-items-center justify-content-center border-start border-secondary border-opacity-25">
+                    <div style="width: 100%; max-width: 350px;">
                         <canvas id="lsb-demo-chart"></canvas>
                     </div>
                 </div>
@@ -164,12 +255,12 @@
                 datasets: [{
                     data: [87.5, 12.5],
                     backgroundColor: [
-                        'rgba(0, 212, 170, 0.8)',
-                        'rgba(233, 69, 96, 0.8)'
+                        'rgba(0, 240, 255, 0.8)',
+                        'rgba(57, 255, 20, 0.8)'
                     ],
                     borderColor: [
-                        'rgba(0, 212, 170, 1)',
-                        'rgba(233, 69, 96, 1)'
+                        'rgba(0, 240, 255, 1)',
+                        'rgba(57, 255, 20, 1)'
                     ],
                     borderWidth: 2
                 }]
