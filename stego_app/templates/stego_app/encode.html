@@ -1,0 +1,478 @@
+{% extends 'stego_app/base.html' %}
+
+{% block title %}Encode Message{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="section-title">
+                    <i class="bi bi-lock-fill me-3"></i>Encode Message
+                </h1>
+                <p class="text-secondary">Hide your secret message within an image using LSB steganography</p>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row g-4">
+                <!-- Upload & Message Section -->
+                <div class="col-lg-7">
+                    <div class="glass-card h-100">
+                        <form method="post" enctype="multipart/form-data" id="encode-form">
+                            {% csrf_token %}
+
+                            <!-- Image Upload -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-image me-2"></i>Cover Image
+                                </label>
+                                <div class="upload-area" id="upload-area">
+                                    <input type="file" name="image" id="encode-image-input" accept="image/png,image/bmp"
+                                        style="display: none;" required>
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <h4>Drag & Drop Image</h4>
+                                    <p>or click to browse (PNG/BMP only)</p>
+                                </div>
+                                <div class="mt-3 text-center" id="preview-container" style="display: none;">
+                                    <img id="image-preview" class="image-preview active" alt="Preview">
+                                    <p class="text-secondary mt-2 mb-0" id="file-info"></p>
+                                </div>
+                            </div>
+
+                            <!-- Password Section -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-shield-lock me-2"></i>Encryption Password (Optional)
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="encode-password" class="form-control"
+                                        placeholder="Enter password to encrypt message">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text text-secondary mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    If provided, your message will be encrypted with AES-256 before embedding.
+                                </div>
+                            </div>
+
+                            <!-- Options Section -->
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="use_qr_code" id="use-qr">
+                                    <label class="form-check-label" for="use-qr">
+                                        <i class="bi bi-qr-code me-2"></i>Use QR Code Encoding
+                                    </label>
+                                </div>
+                                <div class="form-text text-secondary mt-1">
+                                    Converts your message into a QR code pattern before hiding it. This increases
+                                    robustness against minor corruption.
+                                </div>
+                            </div>
+
+                            <!-- Secret Message -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-chat-square-text me-2"></i>Secret Message
+                                </label>
+                                <textarea name="message" id="secret-message" class="form-control" rows="5"
+                                    placeholder="Enter your secret message here..."
+                                    required>{{ form.message.value|default:'' }}</textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-secondary">
+                                        <span id="char-count">0</span> characters
+                                    </small>
+                                    <small class="text-secondary">
+                                        Capacity: <span id="capacity-display">Upload an image first</span>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-glow w-100" id="encode-btn">
+                                <i class="bi bi-lock-fill me-2"></i>Encode & Generate Stego-Image
+                            </button>
+                        </form>
+
+                        {% if error %}
+                        <div class="alert alert-danger mt-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Capacity & Result Section -->
+                <div class="col-lg-5">
+                    <!-- Capacity Chart -->
+                    <div class="glass-card mb-4">
+                        <h5 class="mb-3" style="font-family: 'Orbitron', sans-serif;">
+                            <i class="bi bi-pie-chart me-2" style="color: var(--highlight);"></i>Capacity Analysis
+                        </h5>
+                        <div class="chart-container">
+                            <canvas id="capacity-chart"></canvas>
+                        </div>
+                        <div class="row mt-3 text-center" id="capacity-stats" style="display: none;">
+                            <div class="col-6">
+                                <div class="stat-value" id="stat-used">0</div>
+                                <div class="stat-label">Chars Used</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-value" style="color: var(--success);" id="stat-available">0</div>
+                                <div class="stat-label">Available</div>
+                            </div>
+                        </div>
+                        <p class="text-center text-secondary mt-3" id="no-image-msg">
+                            <i class="bi bi-info-circle me-2"></i>Upload an image to see capacity
+                        </p>
+                    </div>
+
+                    <!-- Download Section (shown after encoding) -->
+                    {% if encoded_image %}
+                    <div class="glass-card mb-4" style="border-color: var(--success);">
+                        <div class="text-center">
+                            <i class="bi bi-check-circle-fill mb-3" style="font-size: 3rem; color: var(--success);"></i>
+                            <h5 class="mb-3" style="font-family: 'Orbitron', sans-serif; color: var(--success);">
+                                Message Encoded Successfully!
+                            </h5>
+                            <p class="text-secondary mb-4">
+                                Your message ({{ message_length }} chars) has been hidden in the image.
+                            </p>
+                            <form method="post" action="{% url 'stego_app:download' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="image_data" value="{{ encoded_image }}">
+                                <button type="submit" class="btn btn-glow btn-success-glow w-100">
+                                    <i class="bi bi-download me-2"></i>Download Stego-Image
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Quality Metrics Section -->
+                    {% if metrics %}
+                    <div class="glass-card">
+                        <h5 class="mb-3" style="font-family: 'Orbitron', sans-serif;">
+                            <i class="bi bi-bar-chart-fill me-2" style="color: var(--highlight);"></i>Image Quality
+                            Analysis
+                        </h5>
+
+                        <!-- PSNR & MSE Scores -->
+                        <div class="row text-center mb-4">
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-value"
+                                        style="color: {% if metrics.psnr > 40 %}var(--success){% elif metrics.psnr > 30 %}#ffc107{% else %}#ff0000{% endif %};">
+                                        {{ metrics.psnr }} dB
+                                    </div>
+                                    <div class="stat-label">PSNR Score</div>
+                                    <small class="text-secondary" style="font-size: 0.8rem;">(Higher is better)</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-value">{{ metrics.mse }}</div>
+                                    <div class="stat-label">MSE Error</div>
+                                    <small class="text-secondary" style="font-size: 0.8rem;">(Lower is better)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Histogram Chart -->
+                        <div>
+                            <canvas id="histogram-chart"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Variables
+    let capacityChart = null;
+    let maxCapacity = 0;
+
+    // DOM Elements
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('encode-image-input');
+    const imagePreview = document.getElementById('image-preview');
+    const previewContainer = document.getElementById('preview-container');
+    const fileInfo = document.getElementById('file-info');
+    const secretMessage = document.getElementById('secret-message');
+    const charCount = document.getElementById('char-count');
+    const capacityDisplay = document.getElementById('capacity-display');
+    const capacityStats = document.getElementById('capacity-stats');
+    const noImageMsg = document.getElementById('no-image-msg');
+    const statUsed = document.getElementById('stat-used');
+    const statAvailable = document.getElementById('stat-available');
+
+    // Initialize Chart
+    const ctx = document.getElementById('capacity-chart');
+    capacityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Used', 'Available'],
+            datasets: [{
+                data: [0, 100],
+                backgroundColor: [
+                    'rgba(233, 69, 96, 0.8)',
+                    'rgba(0, 212, 170, 0.3)'
+                ],
+                borderColor: [
+                    'rgba(233, 69, 96, 1)',
+                    'rgba(0, 212, 170, 0.5)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#ffffff',
+                        font: { family: 'Space Grotesk' }
+                    }
+                }
+            }
+        }
+    });
+
+    // Upload Area Click
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag & Drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+
+    // File Input Change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    // Handle File Selection
+    function handleFileSelect(file) {
+        // Validate file type
+        const validTypes = ['image/png', 'image/bmp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Please select a PNG or BMP image. JPEG is not supported as it uses lossy compression.');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            uploadArea.style.display = 'none';
+            fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        };
+        reader.readAsDataURL(file);
+
+        // Calculate capacity
+        calculateCapacity(file);
+    }
+
+    // Calculate Capacity via API
+    function calculateCapacity(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('{% url "stego_app:calculate_capacity" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    maxCapacity = data.capacity.max_chars;
+                    capacityDisplay.textContent = `${maxCapacity.toLocaleString()} characters`;
+                    noImageMsg.style.display = 'none';
+                    capacityStats.style.display = 'flex';
+                    updateCapacityChart();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    // Update character count and chart
+    secretMessage.addEventListener('input', () => {
+        const length = secretMessage.value.length;
+        charCount.textContent = length.toLocaleString();
+        updateCapacityChart();
+    });
+
+    function updateCapacityChart() {
+        const used = secretMessage.value.length;
+        const available = Math.max(0, maxCapacity - used);
+        const usedPercent = maxCapacity > 0 ? (used / maxCapacity) * 100 : 0;
+        const availablePercent = 100 - usedPercent;
+
+        capacityChart.data.datasets[0].data = [usedPercent, availablePercent];
+
+        // Change color if over capacity
+        if (used > maxCapacity) {
+            capacityChart.data.datasets[0].backgroundColor[0] = 'rgba(255, 0, 0, 0.8)';
+            capacityChart.data.datasets[0].borderColor[0] = 'rgba(255, 0, 0, 1)';
+        } else {
+            capacityChart.data.datasets[0].backgroundColor[0] = 'rgba(233, 69, 96, 0.8)';
+            capacityChart.data.datasets[0].borderColor[0] = 'rgba(233, 69, 96, 1)';
+        }
+
+        capacityChart.update();
+
+        // Update stats
+        statUsed.textContent = used.toLocaleString();
+        statAvailable.textContent = available.toLocaleString();
+        statAvailable.style.color = used > maxCapacity ? '#ff0000' : 'var(--success)';
+    }
+
+    // Form validation
+    document.getElementById('encode-form').addEventListener('submit', function (e) {
+        const message = secretMessage.value.trim();
+        if (!message) {
+            e.preventDefault();
+            alert('Please enter a message to hide.');
+            return;
+        }
+        if (maxCapacity > 0 && message.length > maxCapacity) {
+            e.preventDefault();
+            alert('Message is too long for this image. Please use a larger image or shorter message.');
+            return;
+        }
+    });
+    // Password Toggle
+    document.getElementById('toggle-password').addEventListener('click', function () {
+        const passwordInput = document.getElementById('encode-password');
+        const icon = this.querySelector('i');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+
+    {% if metrics %}
+    // Histogram Chart
+    const histCtx = document.getElementById('histogram-chart');
+    if (histCtx) {
+        new Chart(histCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 256 }, (_, i) => i),
+                datasets: [
+                    {
+                        label: 'Red (Original)',
+                        data: {{ metrics.hist_original.r | safe }},
+            borderColor: 'rgba(255, 99, 132, 0.5)',
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false
+        },
+            {
+                label: 'Red (Stego)',
+                data: {{ metrics.hist_stego.r | safe }},
+    borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+            borderDash: [5, 5],
+                pointRadius: 0,
+                    fill: false
+                    },
+    {
+        label: 'Green (Stego)',
+            data: { { metrics.hist_stego.g | safe } },
+        borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+                pointRadius: 0,
+                    fill: false
+    },
+    {
+        label: 'Blue (Stego)',
+            data: { { metrics.hist_stego.b | safe } },
+        borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+                pointRadius: 0,
+                    fill: false
+    }
+                ]
+            },
+    options: {
+        responsive: true,
+            interaction: {
+            mode: 'index',
+                intersect: false,
+                },
+        plugins: {
+            title: {
+                display: true,
+                    text: 'RGB Histogram Comparison',
+                        color: '#fff'
+            },
+            legend: {
+                labels: { color: '#fff' }
+            }
+        },
+        scales: {
+            x: {
+                display: true,
+                    title: {
+                    display: true,
+                        text: 'Pixel Value (0-255)'
+                },
+                ticks: { color: '#ccc' }
+            },
+            y: {
+                display: true,
+                    title: {
+                    display: true,
+                        text: 'Frequency'
+                },
+                ticks: { color: '#ccc' },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+            }
+        }
+    }
+        });
+    }
+    {% endif %}
+</script>
+{% endblock %}

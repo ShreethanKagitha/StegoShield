@@ -1,0 +1,108 @@
+{% extends 'stego_app/base.html' %}
+
+{% block title %}Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="section-title">
+                <i class="bi bi-speedometer2 me-3"></i>Performance Analytics
+            </h1>
+            <p class="text-secondary">Real-time statistics of steganography operations</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4 col-lg-2">
+            <div class="glass-card text-center h-100 p-3">
+                <div class="stat-value" style="color: var(--highlight);">{{ total_ops }}</div>
+                <div class="text-secondary small">Total Operations</div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="glass-card text-center h-100 p-3">
+                <div class="stat-value" style="color: var(--success);">{{ encode_ops }}</div>
+                <div class="text-secondary small">Encodes</div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="glass-card text-center h-100 p-3">
+                <div class="stat-value" style="color: #00d4aa;">{{ decode_ops }}</div>
+                <div class="text-secondary small">Decodes</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="glass-card text-center h-100 p-3">
+                <div class="stat-value">{{ avg_psnr }} dB</div>
+                <div class="text-secondary small">Avg PSNR (Quality)</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="glass-card text-center h-100 p-3">
+                <div class="stat-value">{{ avg_time }} ms</div>
+                <div class="text-secondary small">Avg Processing Time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Table -->
+    <div class="glass-card p-4">
+        <h5 class="mb-4" style="font-family: 'Orbitron', sans-serif;">
+            <i class="bi bi-activity me-2"></i>Recent Activity
+        </h5>
+
+        <div class="table-responsive">
+            <table class="table text-light">
+                <thead>
+                    <tr>
+                        <th class="text-secondary">Time</th>
+                        <th class="text-secondary">Operation</th>
+                        <th class="text-secondary">Status</th>
+                        <th class="text-secondary">Size</th>
+                        <th class="text-secondary">Latency</th>
+                        <th class="text-secondary">PSNR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in recent_activity %}
+                    <tr>
+                        <td>{{ activity.timestamp|date:"H:i:s" }}</td>
+                        <td>
+                            <span
+                                class="badge {% if activity.operation == 'ENCODE' %}bg-primary{% else %}bg-info{% endif %} bg-opacity-25 text-white border border-secondary">
+                                {{ activity.operation }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if activity.success %}
+                            <span class="text-success"><i class="bi bi-check-circle-fill"></i> Success</span>
+                            {% else %}
+                            <span class="text-danger"><i class="bi bi-x-circle-fill"></i> Failed</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ activity.image_size_bytes|filesizeformat }}</td>
+                        <td>{{ activity.processing_time_ms|floatformat:0 }} ms</td>
+                        <td>
+                            {% if activity.psnr %}
+                            <span
+                                style="color: {% if activity.psnr > 40 %}var(--success){% elif activity.psnr > 30 %}#ffc107{% else %}#ff0000{% endif %};">
+                                {{ activity.psnr|floatformat:1 }} dB
+                            </span>
+                            {% else %}-{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-secondary py-4">
+                            No activity recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

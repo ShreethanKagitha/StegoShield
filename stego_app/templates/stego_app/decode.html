@@ -1,0 +1,256 @@
+{% extends 'stego_app/base.html' %}
+
+{% block title %}Decode Message{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="section-title">
+                    <i class="bi bi-unlock-fill me-3"></i>Decode Message
+                </h1>
+                <p class="text-secondary">Extract the hidden message from a stego-image</p>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="glass-card mb-4">
+                <form method="post" enctype="multipart/form-data" id="decode-form">
+                    {% csrf_token %}
+
+                    <!-- Image Upload -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-image me-2"></i>Stego-Image
+                        </label>
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" name="image" id="decode-image-input" accept="image/png,image/bmp"
+                                style="display: none;" required>
+                            <i class="bi bi-file-earmark-image"></i>
+                            <h4>Upload Stego-Image</h4>
+                            <p>Drag & drop or click to browse (PNG/BMP)</p>
+                        </div>
+                        <div class="mt-3 text-center" id="preview-container" style="display: none;">
+                            <img id="image-preview" class="image-preview active" alt="Preview">
+                            <p class="text-secondary mt-2 mb-0" id="file-info"></p>
+                            <button type="button" class="btn btn-outline-light btn-sm mt-2" onclick="resetUpload()">
+                                <i class="bi bi-x-circle me-1"></i>Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Password Section -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-shield-lock me-2"></i>Decryption Password (If encrypted)
+                        </label>
+                        <div class="input-group">
+                            <input type="password" name="password" id="decode-password" class="form-control"
+                                placeholder="Enter password to decrypt message">
+                            <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-glow btn-success-glow w-100" id="decode-btn">
+                        <i class="bi bi-unlock-fill me-2"></i>Extract Hidden Message
+                    </button>
+                </form>
+
+                {% if error %}
+                <div class="alert alert-danger mt-4">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Result Section -->
+            {% if decoded_message %}
+            <div class="glass-card" style="border-color: var(--success); animation: fadeIn 0.5s ease;">
+                <div class="text-center mb-4">
+                    <i class="bi bi-check-circle-fill" style="font-size: 3rem; color: var(--success);"></i>
+                    <h4 class="mt-3" style="font-family: 'Orbitron', sans-serif; color: var(--success);">
+                        Message Decoded Successfully!
+                    </h4>
+                </div>
+
+                <div class="decoded-message mb-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge" style="background: var(--success);">
+                            <i class="bi bi-chat-quote me-1"></i>Hidden Message
+                        </span>
+                        <button class="btn-copy" onclick="copyMessage()">
+                            <i class="bi bi-clipboard me-1"></i>Copy
+                        </button>
+                    </div>
+                    <p class="mb-0" id="decoded-text">{{ decoded_message }}</p>
+                </div>
+
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-value">{{ decoded_message|length }}</div>
+                            <div class="stat-label">Characters</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            {% if integrity_verified == True %}
+                            <div class="stat-value" style="color: var(--success);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="stat-label">Verified</div>
+                            {% elif integrity_verified == False %}
+                            <div class="stat-value" style="color: #ff0000;">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-label">Tampered</div>
+                            {% else %}
+                            <div class="stat-value" style="color: var(--text-secondary);">
+                                <i class="bi bi-question-circle"></i>
+                            </div>
+                            <div class="stat-label">Unknown</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Instructions -->
+            <div class="glass-card mt-4">
+                <h5 class="mb-3" style="font-family: 'Orbitron', sans-serif;">
+                    <i class="bi bi-info-circle me-2" style="color: var(--highlight);"></i>Important Notes
+                </h5>
+                <ul class="text-secondary mb-0">
+                    <li class="mb-2">
+                        <strong>Only PNG/BMP formats</strong> are supported. JPEG compression destroys hidden data.
+                    </li>
+                    <li class="mb-2">
+                        The image must be <strong>unmodified</strong> from when it was encoded.
+                    </li>
+                    <li class="mb-2">
+                        If the image was resized, compressed, or edited, the message may be corrupted.
+                    </li>
+                    <li>
+                        <strong>No message found?</strong> The image may not contain hidden data or was corrupted.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // DOM Elements
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('decode-image-input');
+    const imagePreview = document.getElementById('image-preview');
+    const previewContainer = document.getElementById('preview-container');
+    const fileInfo = document.getElementById('file-info');
+
+    // Upload Area Click
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag & Drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+
+    // File Input Change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    // Handle File Selection
+    function handleFileSelect(file) {
+        // Validate file type
+        const validTypes = ['image/png', 'image/bmp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Please select a PNG or BMP image.');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            uploadArea.style.display = 'none';
+            fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Reset Upload
+    function resetUpload() {
+        fileInput.value = '';
+        previewContainer.style.display = 'none';
+        uploadArea.style.display = 'block';
+    }
+
+    // Copy Message
+    function copyMessage() {
+        const text = document.getElementById('decoded-text').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector('.btn-copy');
+            btn.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="bi bi-clipboard me-1"></i>Copy';
+            }, 2000);
+        });
+    }
+
+    // Password Toggle
+    document.getElementById('toggle-password').addEventListener('click', function () {
+        const passwordInput = document.getElementById('decode-password');
+        const icon = this.querySelector('i');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+</script>
+{% endblock %}
