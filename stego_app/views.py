@@ -95,30 +95,36 @@ def encode(request):
                     context['message_length'] = len(message)
                     
                     # Record Stats
-                    processing_time = (time.time() - start_time) * 1000
-                    StegoStats.objects.create(
-                        user=request.user if request.user.is_authenticated else None,
-                        operation='ENCODE',
-                        image_size_bytes=image_size,
-                        message_length=len(message),
-                        psnr=metrics['psnr'],
-                        mse=metrics['mse'],
-                        processing_time_ms=processing_time,
-                        success=True
-                    )
+                    try:
+                        processing_time = (time.time() - start_time) * 1000
+                        StegoStats.objects.create(
+                            user=request.user if request.user.is_authenticated else None,
+                            operation='ENCODE',
+                            image_size_bytes=image_size,
+                            message_length=len(message),
+                            psnr=metrics['psnr'],
+                            mse=metrics['mse'],
+                            processing_time_ms=processing_time,
+                            success=True
+                        )
+                    except Exception:
+                        pass # Ignore DB write errors in serverless environments (like Vercel)
                     
                 except Exception as e:
                     context['error'] = str(e)
                     # Record Failure
-                    processing_time = (time.time() - start_time) * 1000
-                    StegoStats.objects.create(
-                        user=request.user if request.user.is_authenticated else None,
-                        operation='ENCODE',
-                        image_size_bytes=image_size,
-                        message_length=len(message),
-                        processing_time_ms=processing_time,
-                        success=False
-                    )
+                    try:
+                        processing_time = (time.time() - start_time) * 1000
+                        StegoStats.objects.create(
+                            user=request.user if request.user.is_authenticated else None,
+                            operation='ENCODE',
+                            image_size_bytes=image_size,
+                            message_length=len(message),
+                            processing_time_ms=processing_time,
+                            success=False
+                        )
+                    except Exception:
+                        pass # Ignore DB write errors
 
             except Exception as e:
                 context['error'] = str(e)
@@ -155,27 +161,33 @@ def decode(request):
                 context['success'] = True
                 
                 # Record Stats
-                processing_time = (time.time() - start_time) * 1000
-                StegoStats.objects.create(
-                    user=request.user if request.user.is_authenticated else None,
-                    operation='DECODE',
-                    image_size_bytes=image_size,
-                    message_length=len(message) if message else 0,
-                    processing_time_ms=processing_time,
-                    success=True
-                )
+                try:
+                    processing_time = (time.time() - start_time) * 1000
+                    StegoStats.objects.create(
+                        user=request.user if request.user.is_authenticated else None,
+                        operation='DECODE',
+                        image_size_bytes=image_size,
+                        message_length=len(message) if message else 0,
+                        processing_time_ms=processing_time,
+                        success=True
+                    )
+                except Exception:
+                    pass # Ignore DB write errors in serverless environments (like Vercel)
                 
             except Exception as e:
                 context['error'] = str(e)
                 # Record Failure
-                processing_time = (time.time() - start_time) * 1000
-                StegoStats.objects.create(
-                    user=request.user if request.user.is_authenticated else None,
-                    operation='DECODE',
-                    image_size_bytes=image_size,
-                    processing_time_ms=processing_time,
-                    success=False
-                )
+                try:
+                    processing_time = (time.time() - start_time) * 1000
+                    StegoStats.objects.create(
+                        user=request.user if request.user.is_authenticated else None,
+                        operation='DECODE',
+                        image_size_bytes=image_size,
+                        processing_time_ms=processing_time,
+                        success=False
+                    )
+                except Exception:
+                    pass # Ignore DB write errors
         else:
             context['error'] = 'Please select a valid image file.'
         
